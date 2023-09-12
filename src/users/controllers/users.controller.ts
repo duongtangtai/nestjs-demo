@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseUUIDPipe, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
-import { CreateUserDto } from '../dtos/CreateUserDto';
+import { CreateUserDto } from '../dtos/CreateUser.dto';
 import { UUID } from 'crypto';
-import { UpdateUserDto } from '../dtos/UpdateUserDto';
+import { UpdateUserDto } from '../dtos/UpdateUser.dto';
 
 @Controller("users")
 @UsePipes(ValidationPipe)
