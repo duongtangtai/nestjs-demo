@@ -1,7 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import { BaseEntity } from "./Base.entity";
 import { UUID } from "crypto";
-import { Role } from "./Role.entity";
 
 @Entity("permissions")
 export class Permission extends BaseEntity {
@@ -13,8 +12,4 @@ export class Permission extends BaseEntity {
 
     @Column()
     description: string;
-
-    // @ManyToMany(() => Role)
-    // @JoinTable()
-    // roles: Role[]
 }

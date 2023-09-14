@@ -10,6 +10,7 @@ import { JwtService } from "@nestjs/jwt/dist"
 import { PermissionsModule } from './permissions/permissions.module';
 import { Permission } from './common/entities/Permission.entity';
 import { Role } from './common/entities/Role.entity';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -28,14 +29,14 @@ import { Role } from './common/entities/Role.entity';
       logging: true,
       subscribers: [],
     }),
-    UsersModule, AuthModule, PermissionsModule],
+    UsersModule, AuthModule, PermissionsModule, RolesModule],
   providers: [JwtService, RequestService],
   exports: [JwtService, RequestService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthenicationMiddleWare)
-      .exclude("auth")
+      .exclude("/auth/(.*)")
       .forRoutes("*")
   }
 }

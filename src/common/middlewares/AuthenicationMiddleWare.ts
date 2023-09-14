@@ -14,8 +14,7 @@ export class AuthenicationMiddleWare implements NestMiddleware {
     private readonly logger = new Logger(AuthenicationMiddleWare.name)
 
     async use(req: Request, res: Response, next: (error?: any) => void) {
-        this.logger.debug("Middleware checking token.....")
-        console.log(req.headers)
+        this.logger.debug("Middleware checking token..... for path: ", req.originalUrl)
         const { authorization } = req.headers;
         if (!authorization) {
             throw new UnauthorizedException();

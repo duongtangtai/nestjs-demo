@@ -1,21 +1,21 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { PermissionsController } from './controllers/permissions.controller';
-import { PermissionsService } from './services/permissions.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Permission } from 'src/common/entities/Permission.entity';
 import { AppModule } from 'src/app.module';
+import { Role } from 'src/common/entities/Role.entity';
+import { RolesController } from './controllers/Roles.controller';
+import { RolesService } from './services/Roles.service';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 import { APP_FILTER } from '@nestjs/core';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Permission]), forwardRef(() => AppModule)],
+    imports: [TypeOrmModule.forFeature([Role]), forwardRef(() => AppModule)],
     providers: [
         {
             provide: APP_FILTER,
             useClass: HttpExceptionFilter
         },
-        PermissionsService,
+        RolesService,
     ],
-    controllers: [PermissionsController],
+    controllers: [RolesController],
 })
-export class PermissionsModule {}
+export class RolesModule {}

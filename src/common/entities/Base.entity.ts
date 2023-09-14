@@ -14,5 +14,4 @@ export class BaseEntity {
     
     @UpdateDateColumn()
     updatedAt: Date;
-
 }

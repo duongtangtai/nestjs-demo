@@ -7,13 +7,15 @@ import { User } from 'src/common/entities/User.entity';
 import { RequestService } from 'src/common/services/Request.service';
 import { JwtService } from "@nestjs/jwt"
 import { AppModule } from 'src/app.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([User]),
-        forwardRef(() => AppModule)
+        forwardRef(() => AppModule),
+        forwardRef(() => UsersModule)
     ],
     controllers: [AuthController],
-    providers: [AuthService, UsersService]
+    providers: [AuthService]
 })
 export class AuthModule { }

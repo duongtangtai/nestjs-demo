@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseUUIDPipe, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseUUIDPipe, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dtos/CreateUser.dto';
 import { UUID } from 'crypto';
@@ -12,12 +12,13 @@ export class UsersController {
     }
 
     @Get()
-    getUsers() {
-        return this.usersService.getUsers();
+    getUsers(@Query("username") username: string, @Query("email") email: string) {
+        return this.usersService.getUsers(username, email);
     }
 
     @Get(":id")
     getUserById(@Param("id", ParseUUIDPipe) id: UUID) {
+        console.log("getbyid")
         return this.usersService.getUserById(id)
     }
 
