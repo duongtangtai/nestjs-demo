@@ -68,13 +68,14 @@ export class AuthService {
         try {
             const { id, username, email } = await verifyToken(this.jwtService, accessToken)
             if (!id || !username || !email) {
-                return error("Invalid user info", HttpStatus.UNAUTHORIZED)
+                return error("Invalid user info", HttpStatus.BAD_REQUEST)
             }
             const access_token = await generateAccessToken(this.jwtService, { id, username, email })
             const refresh_token = await generateRefreshToken(this.jwtService, { id, username, email })
             return response({ access_token, refresh_token }, HttpStatus.OK)
         } catch (e) {
-            throw new HttpException(e, HttpStatus.UNAUTHORIZED)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
+        
     }
 }

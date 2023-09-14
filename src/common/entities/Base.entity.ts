@@ -3,13 +3,13 @@ import { Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 export class BaseEntity {
 
-    @Column({nullable: true})
+    @Column()
     createdBy: string;
 
     @CreateDateColumn()
     createdAt: Date;
 
-    @Column({nullable: true})
+    @Column()
     updatedBy: string;
     
     @UpdateDateColumn()
