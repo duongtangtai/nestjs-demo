@@ -3,6 +3,8 @@ import { UUID } from "crypto";
 import { CreatePermissionDto } from "../dtos/CreatePermission.dto";
 import { PermissionsService } from "../services/permissions.service";
 import { UpdatePermissionDto } from "../dtos/UpdatePermission.dto";
+import { CreateInfoPipe } from "src/common/pipes/transform-pipes/CreateInfoPipe";
+import { UpdateInfoPipe } from "src/common/pipes/transform-pipes/UpdateInfoPipe";
 
 @Controller("permissions")
 @UsePipes(ValidationPipe)
@@ -22,12 +24,12 @@ export class PermissionsController {
     }
 
     @Post()
-    createPermission(@Body() createPermissionDto: CreatePermissionDto) {
+    createPermission(@Body(CreateInfoPipe) createPermissionDto: CreatePermissionDto) {
         return this.permissionsService.createPermission(createPermissionDto)
     }
 
     @Put(":id")
-    updatePermission(@Param("id", ParseUUIDPipe) id: UUID, @Body() updatePermissionDto: UpdatePermissionDto) {
+    updatePermission(@Param("id", ParseUUIDPipe) id: UUID, @Body(UpdateInfoPipe) updatePermissionDto: UpdatePermissionDto) {
         return this.permissionsService.updatePermission(id, updatePermissionDto)
     }
 

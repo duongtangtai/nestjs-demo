@@ -4,6 +4,8 @@ import { UUID} from "crypto";
 import { CreateRoleDto } from "../dtos/CreateRole.dto";
 import { UpdateRoleDto } from "../dtos/UpdateRole.dto";
 import { RolesService } from "../services/Roles.service";
+import { CreateInfoPipe } from "src/common/pipes/transform-pipes/CreateInfoPipe";
+import { UpdateInfoPipe } from "src/common/pipes/transform-pipes/UpdateInfoPipe";
 
 @Controller("roles")
 export class RolesController {
@@ -23,12 +25,12 @@ export class RolesController {
     }
 
     @Post()
-    createRole(@Body() createRoleDto: CreateRoleDto) {
+    createRole(@Body(CreateInfoPipe) createRoleDto: CreateRoleDto) {
         return this.rolesService.createRole(createRoleDto)
     }
 
     @Put(":id")
-    updateRole(@Param("id", ParseUUIDPipe) id: UUID, @Body() updateRoleDto: UpdateRoleDto) {
+    updateRole(@Param("id", ParseUUIDPipe) id: UUID, @Body(UpdateInfoPipe) updateRoleDto: UpdateRoleDto) {
         return this.rolesService.updateRole(id, updateRoleDto)
     }
 

@@ -4,14 +4,14 @@ import { Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 export class BaseEntity {
 
     @Column()
-    createdBy: string;
+    created_by: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+    @CreateDateColumn({type: "timestamptz"})
+    created_at: Date;
 
     @Column()
-    updatedBy: string;
+    updated_by: string;
     
-    @UpdateDateColumn()
-    updatedAt: Date;
+    @UpdateDateColumn({type: "timestamptz"})
+    updated_at: Date;
 }

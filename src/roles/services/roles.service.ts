@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UUID } from "crypto";
 import { Role } from "src/common/entities/Role.entity";
-import { RequestService } from "src/common/services/Request.service";
 import { error, response } from "src/utils/ResponseUtils";
 import { Repository } from "typeorm";
 
@@ -12,7 +11,6 @@ export class RolesService {
 
     constructor(
         @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
-        private readonly requestService: RequestService
     ) { }
 
     async getRoles() {
@@ -23,7 +21,8 @@ export class RolesService {
                 return { id, name, description }
             }), HttpStatus.OK)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -38,7 +37,8 @@ export class RolesService {
             const { id, name, description } = role;
             return response({ id, name, description }, HttpStatus.OK)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -48,13 +48,12 @@ export class RolesService {
             const newRole: Role = this.roleRepository.create({ ...createRoleParams })
             const savedRole: Role = await this.roleRepository.save({
                 ...newRole,
-                createdBy: this.requestService.getUserData().username,
-                updatedBy: this.requestService.getUserData().username
             })
             const { id, name, description } = savedRole;
             return response({ id, name, description }, HttpStatus.CREATED)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -69,13 +68,13 @@ export class RolesService {
             const updatedRole: Role = await this.roleRepository.save({
                 ...role,
                 ...updateRoleParams,
-                updatedBy: this.requestService.getUserData().username,
             })
 
             const { id, name, description } = updatedRole;
             return response({ id, name, description }, HttpStatus.OK)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -89,7 +88,8 @@ export class RolesService {
             await this.roleRepository.delete(id)
             return response("Deleted role successfully", HttpStatus.OK);
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 }

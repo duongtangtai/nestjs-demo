@@ -12,7 +12,6 @@ export class PermissionsService {
 
     constructor(
         @InjectRepository(Permission) private readonly permissionRepository: Repository<Permission>,
-        private requestService: RequestService
     ) { }
 
     async getPermissions() {
@@ -23,7 +22,8 @@ export class PermissionsService {
                 return { id, name, description }
             }), HttpStatus.OK)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -37,7 +37,8 @@ export class PermissionsService {
             const { id, name, description } = entity;
             return response({ id, name, description }, HttpStatus.OK)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -48,13 +49,12 @@ export class PermissionsService {
             const savedEntity: Permission =
                 await this.permissionRepository.save({
                     ...newEntity,
-                    createdBy: this.requestService.getUserData().username,
-                    updatedBy: this.requestService.getUserData().username
                 });
             const { id, name, description } = savedEntity;
             return response({ id, name, description }, HttpStatus.CREATED)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -68,12 +68,12 @@ export class PermissionsService {
             const updatedEntity: Permission = await this.permissionRepository.save({
                 ...entity,
                 ...updatePermissionParams,
-                updatedBy: this.requestService.getUserData().username
             })
             const { id, name, description } = updatedEntity;
             return response({ id, name, description }, HttpStatus.OK)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 

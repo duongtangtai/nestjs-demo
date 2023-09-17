@@ -72,6 +72,9 @@ export class AuthService {
             }
             const access_token = await generateAccessToken(this.jwtService, { id, username, email })
             const refresh_token = await generateRefreshToken(this.jwtService, { id, username, email })
+            console.log("refreshToken")
+            console.log(access_token)
+            console.log(refresh_token)
             return response({ access_token, refresh_token }, HttpStatus.OK)
         } catch (e) {
             throw new HttpException(e, HttpStatus.BAD_REQUEST)

@@ -2,10 +2,10 @@ import { HttpException, HttpStatus, Injectable, NotFoundException, Logger } from
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 import { User } from "src/common/entities/User.entity";
-import { RequestService } from "src/common/services/Request.service";
 import { error, response } from "src/utils/ResponseUtils";
 import { UUID } from "crypto";
 import * as bcrypt from "bcrypt";
+import { formatDate } from "src/utils/DateFormatted";
 
 @Injectable()
 export class UsersService {
@@ -13,20 +13,29 @@ export class UsersService {
 
     constructor(
         @InjectRepository(User) private userRepository: Repository<User>,
-        private requestService: RequestService,
     ) { }
 
     async getUsers(username: string, email: string) {
         console.log("username: ", username)
         console.log("email: ", email)
+        const users: User[] = await this.userRepository.query(`
+            SELECT * 
+            FROM USERS
+            WHERE USERNAME LIKE '${username}%'
+            AND EMAIL LIKE '${email}%'
+        `)
+        console.log("RAWDATA=>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        console.log(users)
         try {
             this.logger.debug("getUsers")
-            return response((await this.userRepository.find()).map(user => {
-                const { id, username, email, updatedAt, updatedBy} = user;
-                return { id, username, email, updatedAt, updatedBy };
+            return response(users.map(user => {
+                console.log(user)
+                const { id, username, email, updated_at, updated_by } = user;
+                return { id, username, email, updated_at: formatDate(updated_at), updated_by};
             }), HttpStatus.OK);
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -40,13 +49,15 @@ export class UsersService {
             const { id, username, email } = user;
             return response({ id, username, email }, HttpStatus.OK);
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
     async createUser(createUserParams: CreateUserParams) {
         try {
             this.logger.debug("createUser")
+            console.log(createUserParams)
             //validation 
             const oldUser: User = await this.userRepository.findOneBy({ email: createUserParams.email })
             if (oldUser) {
@@ -58,13 +69,12 @@ export class UsersService {
             const userInfo: User = this.userRepository.create({
                 ...createUserParams,
                 password: hash,
-                createdBy: this.requestService.getUserData().username,
-                updatedBy: this.requestService.getUserData().username,
             })
             const { id, username, email }: User = await this.userRepository.save(userInfo);
             return response({ id, username, email }, HttpStatus.CREATED);
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -75,16 +85,15 @@ export class UsersService {
             if (!user) {
                 return error("User not found", HttpStatus.BAD_REQUEST)
             }
-            console.log(user)
             const { id, username, email }: User =
                 await this.userRepository.save({
                     ...user,
                     ...updateUserParams,
-                    updatedBy: this.requestService.getUserData().username,
                 })
             return response({ id, username, email }, HttpStatus.OK);
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -98,7 +107,8 @@ export class UsersService {
             await this.userRepository.delete(inputId)
             return response("Deleted user successfuly!", HttpStatus.OK)
         } catch (e) {
-            throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 }

@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, Scope } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './common/entities/User.entity';
@@ -11,6 +11,9 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { Permission } from './common/entities/Permission.entity';
 import { Role } from './common/entities/Role.entity';
 import { RolesModule } from './roles/roles.module';
+import { APP_PIPE } from "@nestjs/core"
+import { CreateInfoPipe } from './common/pipes/transform-pipes/CreateInfoPipe';
+import { UpdateInfoPipe } from './common/pipes/transform-pipes/UpdateInfoPipe';
 
 @Module({
   imports: [
