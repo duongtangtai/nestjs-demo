@@ -5,6 +5,7 @@ import { UUID } from 'crypto';
 import { UpdateUserDto } from '../dtos/UpdateUser.dto';
 import { CreateInfoPipe } from 'src/common/pipes/transform-pipes/CreateInfoPipe';
 import { UpdateInfoPipe } from 'src/common/pipes/transform-pipes/UpdateInfoPipe';
+import { AddUserRolesDto } from '../dtos/AddUserRoles.dto';
 
 @Controller("users")
 @UsePipes(ValidationPipe)
@@ -36,5 +37,10 @@ export class UsersController {
     @Delete(":id")
     deleteUserById(@Param("id", ParseUUIDPipe) id: UUID) {
         return this.usersService.deleteUserById(id)
+    }
+
+    @Post("/add-roles")
+    addRolesToUser(@Body(UpdateInfoPipe) addUserRolesDto: AddUserRolesDto) {
+        return this.usersService.addRolesToUser(addUserRolesDto);
     }
 }

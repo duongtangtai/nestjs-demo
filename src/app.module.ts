@@ -34,7 +34,7 @@ import { UpdateInfoPipe } from './common/pipes/transform-pipes/UpdateInfoPipe';
     }),
     UsersModule, AuthModule, PermissionsModule, RolesModule],
   providers: [JwtService, RequestService],
-  exports: [JwtService, RequestService],
+  exports: [JwtService, RequestService, RolesModule],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

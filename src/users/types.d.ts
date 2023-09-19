@@ -9,3 +9,8 @@ type UpdateUserParams = {
     password: string;
     email: string;
 }
+
+type AddUserRolesParams = {
+    userId: UUID,
+    roleNames: string[],
+}

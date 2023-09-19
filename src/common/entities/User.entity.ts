@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn} from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable} from "typeorm";
 import { BaseEntity } from "./Base.entity";
+import { Role } from "./Role.entity";
 
 @Entity({
     name: "users"
@@ -16,4 +17,8 @@ export class User extends BaseEntity {
 
     @Column({unique: true})
     email: string;
+
+    @ManyToMany(() => Role, {onDelete: "NO ACTION"})
+    @JoinTable({name: "users_roles"})
+    roles: Role[]
 }

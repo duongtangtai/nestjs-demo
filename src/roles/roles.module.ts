@@ -17,5 +17,6 @@ import { APP_FILTER } from '@nestjs/core';
         RolesService,
     ],
     controllers: [RolesController],
+    exports: [TypeOrmModule.forFeature([Role])]
 })
 export class RolesModule {}

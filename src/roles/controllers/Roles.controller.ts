@@ -1,4 +1,4 @@
-import { Get, Post, Put, Delete, Param, ParseUUIDPipe, Body, Logger} from "@nestjs/common";
+import { Get, Post, Put, Delete, Param, ParseUUIDPipe, Body, Logger, Query} from "@nestjs/common";
 import { Controller } from "@nestjs/common/decorators/core/controller.decorator";
 import { UUID} from "crypto";
 import { CreateRoleDto } from "../dtos/CreateRole.dto";
@@ -15,8 +15,8 @@ export class RolesController {
     ) {}
 
     @Get()
-    getRoles() {
-        return this.rolesService.getRoles()
+    getRoles(@Query("name") name: string, @Query("description") description: string) {
+        return this.rolesService.getRoles(name, description)
     }
 
     @Get(":id")

@@ -13,10 +13,20 @@ export class RolesService {
         @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
     ) { }
 
-    async getRoles() {
+    async getRoles(name: string, description: string) {
+        console.log("name: ", name)
+        console.log("description: ", description)
+        let roles: Role[];
+        roles = await this.roleRepository.query(`
+            SELECT * 
+            FROM ROLES
+            WHERE NAME LIKE '${name}%'
+            AND DESCRIPTION LIKE '${description}%'
+        `)
+        console.log(roles)
         try {
             this.logger.debug("getRoles")
-            return response((await this.roleRepository.find()).map(role => {
+            return response(roles.map(role => {
                 const { id, name, description } = role
                 return { id, name, description }
             }), HttpStatus.OK)
