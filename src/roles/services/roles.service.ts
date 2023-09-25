@@ -4,6 +4,7 @@ import { UUID } from "crypto";
 import { Role } from "src/common/entities/Role.entity";
 import { error, response } from "src/utils/ResponseUtils";
 import { Repository } from "typeorm";
+import { CreateRoleDto } from "../dtos/CreateRole.dto";
 
 @Injectable()
 export class RolesService {
@@ -16,12 +17,14 @@ export class RolesService {
     async getRoles(name: string, description: string) {
         console.log("name: ", name)
         console.log("description: ", description)
+        name = name.toUpperCase();
+        description = description.toUpperCase();
         let roles: Role[];
         roles = await this.roleRepository.query(`
             SELECT * 
             FROM ROLES
-            WHERE NAME LIKE '${name}%'
-            AND DESCRIPTION LIKE '${description}%'
+            WHERE UPPER(NAME) LIKE '${name}%'
+            AND UPPER(DESCRIPTION) LIKE '${description}%'
         `)
         console.log(roles)
         try {
@@ -61,6 +64,21 @@ export class RolesService {
             })
             const { id, name, description } = savedRole;
             return response({ id, name, description }, HttpStatus.CREATED)
+        } catch (e) {
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    async createRoles(createRoleDtos: CreateRoleDto[]) {
+        try {
+            this.logger.debug("createRoles")
+            // const newRole: Role = this.roleRepository.create({ ...createRoleParams })
+            // const savedRole: Role = await this.roleRepository.save({
+            //     ...newRole,
+            // })
+            // const { id, name, description } = savedRole;
+            return response({"test": "hehe"}, HttpStatus.CREATED)
         } catch (e) {
             this.logger.error(e)
             throw new HttpException(e, HttpStatus.BAD_REQUEST)

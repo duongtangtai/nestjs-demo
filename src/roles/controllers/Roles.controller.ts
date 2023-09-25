@@ -1,4 +1,4 @@
-import { Get, Post, Put, Delete, Param, ParseUUIDPipe, Body, Logger, Query} from "@nestjs/common";
+import { Get, Post, Put, Delete, Param, ParseUUIDPipe, Body, Logger, Query, Req, RawBodyRequest} from "@nestjs/common";
 import { Controller } from "@nestjs/common/decorators/core/controller.decorator";
 import { UUID} from "crypto";
 import { CreateRoleDto } from "../dtos/CreateRole.dto";
@@ -27,6 +27,34 @@ export class RolesController {
     @Post()
     createRole(@Body(CreateInfoPipe) createRoleDto: CreateRoleDto) {
         return this.rolesService.createRole(createRoleDto)
+    }
+
+    @Post("many")
+    async createRoles(@Req() req: RawBodyRequest<Request>) {
+        console.log("controller------------------------------------------")
+        console.log(req.body)
+        const formObj = req.body
+        // console.log(createRoleDtos)
+        // return this.rolesService.createRoles(createRoleDtos)
+        let dtos = [];
+        let index : string = "";
+        for (const key in formObj) {
+            const arr = key.split("_");
+            if (arr[0] !== index) { //new item
+                index = arr[0];
+                dtos.push({
+                    [arr[1]] : formObj[key]
+                })
+            } else { //old item
+                dtos[arr[0]] = {
+                    ...dtos[arr[0]],
+                    [arr[1]] : formObj[key]
+                }
+            }
+        }
+        console.log("finish")
+        console.log(dtos)
+        return "hehe"
     }
 
     @Put(":id")
