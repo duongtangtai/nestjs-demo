@@ -1,8 +1,9 @@
 import { Catch, HttpException, ExceptionFilter, ArgumentsHost, Logger } from "@nestjs/common"
 import { Response } from "express"
 import { error } from "src/utils/ResponseUtils"
+import { QueryFailedError } from "typeorm"
 
-@Catch(HttpException)
+@Catch(HttpException, QueryFailedError)
 export class HttpExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(HttpExceptionFilter.name)
 

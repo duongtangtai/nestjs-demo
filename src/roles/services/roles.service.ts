@@ -2,9 +2,10 @@ import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UUID } from "crypto";
 import { Role } from "src/common/entities/Role.entity";
+import { RequestService } from "src/common/services/Request.service";
+import { formatDate } from "src/utils/DateFormatted";
 import { error, response } from "src/utils/ResponseUtils";
-import { Repository } from "typeorm";
-import { CreateRoleDto } from "../dtos/CreateRole.dto";
+import { In, Repository } from "typeorm";
 
 @Injectable()
 export class RolesService {
@@ -12,6 +13,7 @@ export class RolesService {
 
     constructor(
         @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
+        private readonly requestService: RequestService,
     ) { }
 
     async getRoles(name: string, description: string) {
@@ -70,25 +72,46 @@ export class RolesService {
         }
     }
 
-    async createRoles(createRoleDtos: CreateRoleDto[]) {
+    async modifyRoles(createRoleParams: CreateRoleParams[], updateRoleParams: UpdateRoleParams[], deletedIds: string[]) {
         try {
-            this.logger.debug("createRoles")
-            // const newRole: Role = this.roleRepository.create({ ...createRoleParams })
-            // const savedRole: Role = await this.roleRepository.save({
-            //     ...newRole,
-            // })
-            // const { id, name, description } = savedRole;
-            return response({"test": "hehe"}, HttpStatus.CREATED)
+            //STEP 1 : DELETE
+            if (deletedIds.length > 0) {
+                await this.roleRepository.delete(deletedIds)
+            }
+
+            //STEP 2 : UPDATE
+            updateRoleParams.forEach(async role => {
+                const existedRole = await this.roleRepository.findOneBy({ id: role.id })
+                if (!existedRole) {
+                    return error(`Role not found with id ${role.id}`, HttpStatus.BAD_REQUEST)
+                }
+                await this.roleRepository.save({
+                    ...existedRole,
+                    ...role,
+                    updated_by: this.requestService.getUserData().username,
+                })
+            })
+
+            //STEP 3 : CREATE
+            createRoleParams.forEach(async role => {
+                const newRole = this.roleRepository.create({ ...role })
+                await this.roleRepository.save({
+                    ...newRole,
+                     created_by: this.requestService.getUserData().username,
+                     updated_by: this.requestService.getUserData().username,
+                })
+            })
+            return response("Saved successfully", HttpStatus.OK)
         } catch (e) {
             this.logger.error(e)
             throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
     }
 
-    async updateRole(inputId: UUID, updateRoleParams: UpdateRoleParams) {
+    async updateRole(updateRoleParams: UpdateRoleParams) {
         try {
             this.logger.debug("updateRole")
-            const role: Role = await this.roleRepository.findOneBy({ id: inputId })
+            const role: Role = await this.roleRepository.findOneBy({ id: updateRoleParams.id })
             if (!role) {
                 return error("Role not found", HttpStatus.BAD_REQUEST)
             }

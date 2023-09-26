@@ -4,6 +4,7 @@ type CreateRoleParams = {
 }
 
 type UpdateRoleParams = {
+    id: UUID;
     name: string;
     description: string;
 }
