@@ -8,3 +8,8 @@ type UpdateRoleParams = {
     name: string;
     description: string;
 }
+
+type AddRolePermissionsParams = {
+    roleId: UUID;
+    permissionNames: string[];
+}

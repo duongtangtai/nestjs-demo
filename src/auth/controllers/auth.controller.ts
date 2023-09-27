@@ -2,9 +2,11 @@ import { Body, Controller, Param, Post, UsePipes, ValidationPipe } from "@nestjs
 import { AuthService } from "../services/auth.service";
 import { LoginDto } from "../dtos/LoginDto";
 import { RegisterDto } from "../dtos/RegisterDto";
+import { AllowUnauthorizedRequest } from "src/common/guards/Permission.decorator";
 
 @Controller("auth")
 @UsePipes(ValidationPipe)
+@AllowUnauthorizedRequest()
 export class AuthController {
     constructor(
         private authService: AuthService

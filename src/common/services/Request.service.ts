@@ -1,7 +1,6 @@
 import { Scope } from "@nestjs/common"
 import { Injectable } from "@nestjs/common/decorators/core"
 import { UUID } from "crypto"
-import { OnModuleInit } from "@nestjs/common/interfaces"
 
 
 @Injectable({ scope: Scope.REQUEST })
@@ -21,4 +20,6 @@ type UserData = {
     id: UUID,
     username: string,
     email: string,
+    isAdmin: boolean,
+    permissions: string[],
 }

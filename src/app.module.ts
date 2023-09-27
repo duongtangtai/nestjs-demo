@@ -11,9 +11,9 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { Permission } from './common/entities/Permission.entity';
 import { Role } from './common/entities/Role.entity';
 import { RolesModule } from './roles/roles.module';
-import { APP_PIPE } from "@nestjs/core"
-import { CreateInfoPipe } from './common/pipes/transform-pipes/CreateInfoPipe';
-import { UpdateInfoPipe } from './common/pipes/transform-pipes/UpdateInfoPipe';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { APP_FILTER, APP_GUARD} from '@nestjs/core';
+import { AuthGuard } from './common/guards/Auth.guard';
 
 @Module({
   imports: [
@@ -33,8 +33,20 @@ import { UpdateInfoPipe } from './common/pipes/transform-pipes/UpdateInfoPipe';
       subscribers: [],
     }),
     UsersModule, AuthModule, PermissionsModule, RolesModule],
-  providers: [JwtService, RequestService],
-  exports: [JwtService, RequestService, RolesModule],
+  providers:
+    [
+      JwtService, RequestService,
+      {
+        provide: APP_FILTER,
+        useClass: HttpExceptionFilter
+      },
+      {
+        provide: APP_GUARD,
+        useClass: AuthGuard,
+        scope: Scope.REQUEST,
+      }
+    ],
+  exports: [JwtService, RequestService, UsersModule, RolesModule, PermissionsModule],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

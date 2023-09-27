@@ -141,17 +141,11 @@ export class UsersService {
         }
         //find roles
         const roles = await this.roleRepository.find({ where: { name: In([...addUserRolesParams.roleNames]) } })
-        // roles.forEach((role) => {
-        //     if (!user.roles.some(userRole => userRole.id === role.id)) {
-        //         console.log("push!!!!!!!")
-        //         user.roles.push(role)
-        //     }
-        // })
         user.roles = roles;
         const { password, ...savedUser }: User = await this.userRepository.save({
             ...user,
-            updated_at: formatDate(new Date()),
             updated_by:  this.requestService.getUserData().username,
+            updated_at: formatDate(new Date())
         })
         return response(savedUser, HttpStatus.OK)
     }

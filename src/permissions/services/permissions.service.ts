@@ -90,5 +90,4 @@ export class PermissionsService {
             throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
         }
     }
-
 }

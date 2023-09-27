@@ -1,11 +1,13 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UUID } from "crypto";
+import { Permission } from "src/common/entities/Permission.entity";
 import { Role } from "src/common/entities/Role.entity";
 import { RequestService } from "src/common/services/Request.service";
+import { PERMISSION_KEY } from "src/utils/constants";
 import { formatDate } from "src/utils/DateFormatted";
 import { error, response } from "src/utils/ResponseUtils";
-import { In, Repository } from "typeorm";
+import { In, Like, Repository } from "typeorm";
 
 @Injectable()
 export class RolesService {
@@ -13,6 +15,7 @@ export class RolesService {
 
     constructor(
         @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
+        @InjectRepository(Permission) private readonly permissionRepository: Repository<Permission>,
         private readonly requestService: RequestService,
     ) { }
 
@@ -21,19 +24,26 @@ export class RolesService {
         console.log("description: ", description)
         name = name.toUpperCase();
         description = description.toUpperCase();
-        let roles: Role[];
-        roles = await this.roleRepository.query(`
-            SELECT * 
-            FROM ROLES
-            WHERE UPPER(NAME) LIKE '${name}%'
-            AND UPPER(DESCRIPTION) LIKE '${description}%'
-        `)
-        console.log(roles)
+        // let roles: Role[];
+        // roles = await this.roleRepository.query(`
+        //     SELECT * 
+        //     FROM ROLES
+        //     WHERE UPPER(NAME) LIKE '${name}%'
+        //     AND UPPER(DESCRIPTION) LIKE '${description}%'
+        // `)
+        const roles = await this.roleRepository.find({
+            where: {
+                name: Like(`${name}%`),
+                description: Like(`${description}%`)
+            },
+            relations: [PERMISSION_KEY]
+        })
         try {
             this.logger.debug("getRoles")
             return response(roles.map(role => {
-                const { id, name, description } = role
-                return { id, name, description }
+                const { id, name, description, permissions } = role
+                // return { id, name, description, permissions: permissions.map(e => { return {id: e.id, name: e.name, description: e.description} }) }
+                return { id, name, description, permissions: permissions.map(e => e.name)}
             }), HttpStatus.OK)
         } catch (e) {
             this.logger.error(e)
@@ -97,8 +107,8 @@ export class RolesService {
                 const newRole = this.roleRepository.create({ ...role })
                 await this.roleRepository.save({
                     ...newRole,
-                     created_by: this.requestService.getUserData().username,
-                     updated_by: this.requestService.getUserData().username,
+                    created_by: this.requestService.getUserData().username,
+                    updated_by: this.requestService.getUserData().username,
                 })
             })
             return response("Saved successfully", HttpStatus.OK)
@@ -138,6 +148,45 @@ export class RolesService {
             }
             await this.roleRepository.delete(id)
             return response("Deleted role successfully", HttpStatus.OK);
+        } catch (e) {
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    async addRolePermissions(addRolePermissionsParams: AddRolePermissionsParams) {
+        try {
+            //find role
+            const role = await this.roleRepository.findOne({ where: { id: addRolePermissionsParams.roleId }, relations: ["permissions"] })
+            if (!role) {
+                return error("Role not found", HttpStatus.BAD_REQUEST)
+            }
+            //find permissions
+            const permissions = await this.permissionRepository.find({ where: { name: In([...addRolePermissionsParams.permissionNames]) } });
+            role.permissions = permissions;
+            const savedRole = await this.roleRepository.save({
+                ...role,
+                updated_by: this.requestService.getUserData().username,
+                updated_at: formatDate(new Date())
+            })
+            return response(savedRole, HttpStatus.OK)
+        } catch (e) {
+            this.logger.error(e)
+            throw new HttpException(e, HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    async getPermissionsByRoleNames(roleNames: string[]) {
+        try {
+            const roles = await this.roleRepository.find({
+                where: {
+                    name: In(roleNames)
+                },
+                relations: [PERMISSION_KEY]
+            })
+            const permissions = new Set<string>();
+            roles.forEach(role => role.permissions.forEach(permission => permissions.add(permission.name)))
+            return Array.from(permissions);
         } catch (e) {
             this.logger.error(e)
             throw new HttpException(e, HttpStatus.BAD_REQUEST)

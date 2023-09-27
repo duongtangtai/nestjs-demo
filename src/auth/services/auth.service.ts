@@ -19,7 +19,13 @@ export class AuthService {
 
     async login(loginDto: LoginDto) {
         try {
-            const user: User = await this.userRepository.findOneBy({ email: loginDto.email })
+            const user: User = await this.userRepository.findOne({
+                where: {
+                    email: loginDto.email
+                },
+                relations:
+                    ['roles']
+                })
             if (!user) {
                 return error("Email or password is not correct", HttpStatus.BAD_REQUEST)
             }
@@ -30,9 +36,10 @@ export class AuthService {
             }
 
             const { id, username, email } = user
-            const access_token = await generateAccessToken(this.jwtService, { id, username, email });
+            const roles = user.roles.map(role => role.name)
+            const access_token = await generateAccessToken(this.jwtService, { id, username, email , roles});
             const refresh_token = await generateRefreshToken(this.jwtService, { id, username, email });
-            return response({ id, username, email, access_token, refresh_token }, HttpStatus.OK)
+            return response({ id, username, email, roles, access_token, refresh_token }, HttpStatus.OK)
         } catch (e) {
             throw new HttpException(e.detail, HttpStatus.BAD_REQUEST)
         }
@@ -79,6 +86,6 @@ export class AuthService {
         } catch (e) {
             throw new HttpException(e, HttpStatus.BAD_REQUEST)
         }
-        
+
     }
 }
