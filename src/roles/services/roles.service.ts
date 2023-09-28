@@ -24,17 +24,13 @@ export class RolesService {
         console.log("description: ", description)
         name = name.toUpperCase();
         description = description.toUpperCase();
-        // let roles: Role[];
-        // roles = await this.roleRepository.query(`
-        //     SELECT * 
-        //     FROM ROLES
-        //     WHERE UPPER(NAME) LIKE '${name}%'
-        //     AND UPPER(DESCRIPTION) LIKE '${description}%'
-        // `)
         const roles = await this.roleRepository.find({
             where: {
                 name: Like(`${name}%`),
                 description: Like(`${description}%`)
+            },
+            order: {
+                created_at: "ASC"
             },
             relations: [PERMISSION_KEY]
         })
@@ -43,7 +39,7 @@ export class RolesService {
             return response(roles.map(role => {
                 const { id, name, description, permissions } = role
                 // return { id, name, description, permissions: permissions.map(e => { return {id: e.id, name: e.name, description: e.description} }) }
-                return { id, name, description, permissions: permissions.map(e => e.name)}
+                return { id, name, description, permissionNames: permissions.map(e => e.name)}
             }), HttpStatus.OK)
         } catch (e) {
             this.logger.error(e)
@@ -82,7 +78,7 @@ export class RolesService {
         }
     }
 
-    async modifyRoles(createRoleParams: CreateRoleParams[], updateRoleParams: UpdateRoleParams[], deletedIds: string[]) {
+    async modifyRoles(createRoleParams: CreateRoleParams[], updateRoleParams: UpdateRoleParams[], deletedIds: UUID[]) {
         try {
             //STEP 1 : DELETE
             if (deletedIds.length > 0) {
@@ -95,9 +91,14 @@ export class RolesService {
                 if (!existedRole) {
                     return error(`Role not found with id ${role.id}`, HttpStatus.BAD_REQUEST)
                 }
+                console.log("permissionNames:")
+                console.log(role.permissionNames)
+                const permissions = await this.permissionRepository.findBy({name: In(role.permissionNames)});
+                existedRole.permissions = permissions;
                 await this.roleRepository.save({
                     ...existedRole,
-                    ...role,
+                    name: role.name,
+                    description: role.description,
                     updated_by: this.requestService.getUserData().username,
                 })
             })
@@ -105,8 +106,10 @@ export class RolesService {
             //STEP 3 : CREATE
             createRoleParams.forEach(async role => {
                 const newRole = this.roleRepository.create({ ...role })
+                const permissions = await this.permissionRepository.findBy({name: In(role.permissionNames)});
                 await this.roleRepository.save({
                     ...newRole,
+                    permissions,
                     created_by: this.requestService.getUserData().username,
                     updated_by: this.requestService.getUserData().username,
                 })

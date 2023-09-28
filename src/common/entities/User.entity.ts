@@ -18,7 +18,7 @@ export class User extends BaseEntity {
     @Column({unique: true})
     email: string;
 
-    @ManyToMany(() => Role, {onDelete: "NO ACTION"})
+    @ManyToMany(() => Role, {onDelete: "CASCADE"})
     @JoinTable({name: "users_roles"})
     roles: Role[]
 }

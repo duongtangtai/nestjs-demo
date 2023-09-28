@@ -11,4 +11,6 @@ export class UpdateRoleDto {
 
     @IsNotEmpty()
     description: string;
+
+    permissionNames: string[]
 }

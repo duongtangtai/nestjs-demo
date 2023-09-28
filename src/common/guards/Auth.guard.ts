@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, Logger, UnauthorizedException} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Logger, UnauthorizedException, HttpException, HttpStatus} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Reflector } from "@nestjs/core"
 import { PermissionKey } from './Permission.key';
@@ -41,7 +41,10 @@ export class AuthGuard implements CanActivate {
             console.log("USER IS ADMIN => PASS")
             return true;
         }
-        return requiredPermissions.every(required => permissions.includes(required));
-        // return true;
+        const isPermitted = requiredPermissions.every(required => permissions.includes(required));
+        if (!isPermitted) {
+            throw new HttpException("No permission", HttpStatus.FORBIDDEN)
+        }
+        return true;
     }
 }

@@ -14,7 +14,7 @@ export class Role extends BaseEntity {
     @Column()
     description: string;
 
-    @ManyToMany(() => Permission, {onDelete: "NO ACTION"})
+    @ManyToMany(() => Permission, {onDelete: "CASCADE"})
     @JoinTable({name: "roles_permissions"})
     permissions: Permission[]
 }

@@ -123,8 +123,6 @@ export class UsersService {
             if (!user) {
                 return error("User not found", HttpStatus.BAD_REQUEST)
             }
-            user.roles = [];
-            await this.userRepository.save(user)
             await this.userRepository.delete(inputId)
             return response("Deleted user successfuly!", HttpStatus.OK)
         } catch (e) {
