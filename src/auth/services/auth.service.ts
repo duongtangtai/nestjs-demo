@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/common/entities/User.entity";
 import { Repository } from "typeorm";
-import { LoginDto } from "../dtos/LoginDto";
+import { LoginDto } from "../dtos/Login.dto";
 import * as bcrypt from "bcrypt"
 import { error, response } from "src/utils/ResponseUtils";
 import { JwtService } from "@nestjs/jwt";
@@ -61,8 +61,8 @@ export class AuthService {
             const userInfo: User = this.userRepository.create({ ...registerDto, password: hash })
             const { id, username, email }: User = await this.userRepository.save({
                 ...userInfo,
-                createdBy: userInfo.username,
-                updatedBy: userInfo.username,
+                created_by: userInfo.username,
+                updated_by: userInfo.username,
             });
             return response({ id, username, email }, HttpStatus.CREATED);
         } catch (e) {

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger, Inject} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm"
 import { In, Like, Not, Repository } from "typeorm"
 import { User } from "src/common/entities/User.entity";
@@ -8,6 +8,9 @@ import * as bcrypt from "bcrypt";
 import { formatDate } from "src/utils/DateFormatted";
 import { Role } from "src/common/entities/Role.entity";
 import { RequestService } from "src/common/services/Request.service";
+import { EVENT_PASSWORD_CHANGED, MAIL_MICROSERVICES } from "src/utils/constants";
+import { ClientKafka } from "@nestjs/microservices/client";
+import { ChangePasswordDto } from "../dtos/ChangePassword.dto";
 
 @Injectable()
 export class UsersService {
@@ -16,7 +19,8 @@ export class UsersService {
     constructor(
         @InjectRepository(User) private userRepository: Repository<User>,
         @InjectRepository(Role) private roleRepository: Repository<Role>,
-        private requestService: RequestService
+        private requestService: RequestService,
+        @Inject(MAIL_MICROSERVICES) private readonly mailMicroservices : ClientKafka,
     ) { }
 
     async getUsers(username: string, email: string) {
@@ -146,5 +150,39 @@ export class UsersService {
             updated_at: formatDate(new Date())
         })
         return response(savedUser, HttpStatus.OK)
+    }
+
+    async changePassword(changePasswordDto: ChangePasswordDto) {
+        //validation
+        const user = await this.userRepository.findOneBy({id: changePasswordDto.userId});
+        if (!user) {
+            return error("User not found.", HttpStatus.BAD_REQUEST)
+        }
+        const tokenInfo = this.requestService.getUserData();
+        if (user.username !== tokenInfo.username) {
+            return error("Token info and username doesn't match.", HttpStatus.BAD_REQUEST)
+        }
+        if (!await bcrypt.compare(changePasswordDto.currentPassword, user.password)) {
+            return error("Old password isn't correct.", HttpStatus.BAD_REQUEST)
+        }
+        if (changePasswordDto.newPassword !== changePasswordDto.confirmNewPassword) {
+            return error("New password and confirm new password doesn't match", HttpStatus.BAD_REQUEST)
+        }
+        //pass => update password for user
+        const salt = await bcrypt.genSalt()
+        const hash = await bcrypt.hash(changePasswordDto.newPassword, salt)
+        const updatedUser = await this.userRepository.save({
+            ...user,
+            password: hash,
+            updated_by: tokenInfo.username,
+        });
+        //send mail to users
+        const mailInfo : EventChangePasswordDto = {
+            username: updatedUser.username,
+            email: updatedUser.email,
+            password: changePasswordDto.newPassword
+        }
+        this.mailMicroservices.emit(EVENT_PASSWORD_CHANGED, mailInfo)
+        return response("Your password has been changed successfully.", HttpStatus.OK)
     }
 }

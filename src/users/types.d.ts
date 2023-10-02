@@ -14,3 +14,9 @@ type AddUserRolesParams = {
     userId: UUID,
     roleNames: string[],
 }
+
+type EventChangePasswordDto = {
+    username: string,
+    email: string,
+    password: string,
+}

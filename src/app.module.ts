@@ -12,8 +12,12 @@ import { Permission } from './common/entities/Permission.entity';
 import { Role } from './common/entities/Role.entity';
 import { RolesModule } from './roles/roles.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { APP_FILTER, APP_GUARD} from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './common/guards/Auth.guard';
+import { ClientsModule } from '@nestjs/microservices';
+import { MAIL_MICROSERVICES, MAIL_MICROSERVICES_GROUP_ID } from './utils/constants';
+import { Transport } from '@nestjs/microservices/enums';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -32,7 +36,22 @@ import { AuthGuard } from './common/guards/Auth.guard';
       logging: true,
       subscribers: [],
     }),
-    UsersModule, AuthModule, PermissionsModule, RolesModule],
+    ClientsModule.register([
+      {
+        name: MAIL_MICROSERVICES,
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            clientId: "user",
+            brokers: ['localhost:9092']
+          },
+          consumer: {
+            groupId: MAIL_MICROSERVICES_GROUP_ID
+          },
+        },
+      }
+    ]),
+    UsersModule, AuthModule, PermissionsModule, RolesModule, GatewayModule],
   providers:
     [
       JwtService, RequestService,
@@ -46,7 +65,7 @@ import { AuthGuard } from './common/guards/Auth.guard';
         scope: Scope.REQUEST,
       }
     ],
-  exports: [JwtService, RequestService, UsersModule, RolesModule, PermissionsModule],
+  exports: [ClientsModule, JwtService, RequestService, UsersModule, RolesModule, PermissionsModule, GatewayModule],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

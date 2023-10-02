@@ -8,6 +8,7 @@ import { UpdateInfoPipe } from 'src/common/pipes/transform-pipes/UpdateInfoPipe'
 import { AddUserRolesDto } from '../dtos/AddUserRoles.dto';
 import { RequiredPermissions } from 'src/common/guards/Permission.decorator';
 import { PermissionKey } from 'src/common/guards/Permission.key';
+import { ChangePasswordDto } from '../dtos/ChangePassword.dto';
 
 @Controller("users")
 @UsePipes(ValidationPipe)
@@ -50,5 +51,10 @@ export class UsersController {
     @RequiredPermissions(PermissionKey.UPDATE_USER)
     addRolesToUser(@Body(UpdateInfoPipe) addUserRolesDto: AddUserRolesDto) {
         return this.usersService.addRolesToUser(addUserRolesDto);
+    }
+
+    @Post("change-password")
+    changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+        return this.usersService.changePassword(changePasswordDto);
     }
 }

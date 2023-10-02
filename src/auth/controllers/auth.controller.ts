@@ -1,8 +1,8 @@
 import { Body, Controller, Param, Post, UsePipes, ValidationPipe } from "@nestjs/common"
 import { AuthService } from "../services/auth.service";
-import { LoginDto } from "../dtos/LoginDto";
+import { LoginDto } from "../dtos/Login.dto";
 import { RegisterDto } from "../dtos/RegisterDto";
-import { AllowUnauthorizedRequest } from "src/common/guards/Permission.decorator";
+import { AllowUnauthorizedRequest, RequiredPermissions } from "src/common/guards/Permission.decorator";
 
 @Controller("auth")
 @UsePipes(ValidationPipe)
