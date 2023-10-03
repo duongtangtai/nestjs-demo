@@ -18,6 +18,8 @@ import { ClientsModule } from '@nestjs/microservices';
 import { MAIL_MICROSERVICES, MAIL_MICROSERVICES_GROUP_ID } from './utils/constants';
 import { Transport } from '@nestjs/microservices/enums';
 import { GatewayModule } from './gateway/gateway.module';
+import { MdmVslCntr } from './common/entities/MdmVslCntr.entity';
+import { VesselsModule } from './vessel-management/vessels.module';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { GatewayModule } from './gateway/gateway.module';
       port: 5432,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      entities: [User, Permission, Role],
+      entities: [User, Permission, Role, MdmVslCntr],
       database: process.env.DB,
       synchronize: true,
       logging: true,
@@ -51,7 +53,7 @@ import { GatewayModule } from './gateway/gateway.module';
         },
       }
     ]),
-    UsersModule, AuthModule, PermissionsModule, RolesModule, GatewayModule],
+    UsersModule, AuthModule, PermissionsModule, RolesModule, GatewayModule, VesselsModule],
   providers:
     [
       JwtService, RequestService,
