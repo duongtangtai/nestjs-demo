@@ -4,7 +4,7 @@ export class SearchVesselsDto {
     vslCd: string;
     vslEngNm: string;
     fdrDivCd: string;
-    crrCr: string;
+    crrCd: string;
     callSgnNo: string;
     lloydNo: string;
 }

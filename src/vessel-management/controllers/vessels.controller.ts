@@ -10,13 +10,13 @@ export class VesselsController {
     }
 
     @Get()
-    getVessels(@Query("vslCd") vslCd: string, @Query("vslEngNm") vslEngNm: string, @Query("callSgnNo") callSgnNo: string, @Query("crrCr") crrCr: string, @Query("fdrDivCd") fdrDivCd: string, @Query("lloydNo") lloydNo: string,) {
+    getVessels(@Query("vslCd") vslCd: string, @Query("vslEngNm") vslEngNm: string, @Query("callSgnNo") callSgnNo: string, @Query("crrCd") crrCd: string, @Query("fdrDivCd") fdrDivCd: string, @Query("lloydNo") lloydNo: string,) {
         console.log("controller...")
         const searchVesselsDto : SearchVesselsDto = {
             vslCd,
             vslEngNm,
             callSgnNo,
-            crrCr,
+            crrCd,
             fdrDivCd,
             lloydNo,
         }

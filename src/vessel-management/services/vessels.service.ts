@@ -21,9 +21,9 @@ export class VesselsService {
                 where: {
                     vslCd : Like(`${searchVesselsDto.vslCd.toUpperCase()}%`),
                     ...(searchVesselsDto.vslEngNm && {vslEngNm : ILike(`%${searchVesselsDto.vslEngNm}%`)}),
-                    ...(searchVesselsDto.crrCr && {crrCd : Like(`${searchVesselsDto.crrCr.toUpperCase()}%`)}),
+                    ...(searchVesselsDto.crrCd && {crrCd : Like(`${searchVesselsDto.crrCd.toUpperCase()}%`)}),
                     ...(searchVesselsDto.fdrDivCd !== "A" && {fdrDivCd : searchVesselsDto.fdrDivCd}),
-                    ...(searchVesselsDto.callSgnNo && {callSignNo : ILike(`%${searchVesselsDto.vslEngNm}%`)}),
+                    ...(searchVesselsDto.callSgnNo && {callSgnNo : ILike(`%${searchVesselsDto.callSgnNo}%`)}),
                     ...(searchVesselsDto.lloydNo && {lloydNo : ILike(`%${searchVesselsDto.lloydNo}%`)}),
                     deltFlg : "N",
                 },
